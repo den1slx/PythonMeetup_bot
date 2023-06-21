@@ -1,5 +1,5 @@
 environs==9.5.0
-pyTelegramBotAPI==4.11.*
+python-telegram-bot==13.15
 python-dotenv==1.0.0
 Django==3.2.19
 

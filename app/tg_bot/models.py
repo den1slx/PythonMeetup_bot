@@ -16,8 +16,8 @@ class Particiant(models.Model):
 
 class Event(models.Model):
     date = models.DateField(verbose_name='Дата проведения митапа')
-    start = models.DateField(verbose_name='Начало митапа')
-    end = models.DateField(verbose_name='Окончание митапа')
+    start = models.TimeField(verbose_name='Начало митапа')
+    end = models.TimeField(verbose_name='Окончание митапа')
 
     class Meta:
         verbose_name = 'Митап'

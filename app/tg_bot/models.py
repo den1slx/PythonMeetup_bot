@@ -35,8 +35,8 @@ class Lecture(models.Model):
     end = models.TimeField(verbose_name='Время окончания доклада')
 
     class Meta:
-        verbose_name = 'Митап'
-        verbose_name_plural = 'Митапы'
+        verbose_name = 'Доклад'
+        verbose_name_plural = 'Доклады'
 
     def __str__(self):
         return f'{self.title} - {self.speaker.name}'

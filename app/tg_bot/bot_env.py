@@ -9,3 +9,5 @@ bot = telebot.TeleBot(tg_bot_token)
 bot.set_my_commands([
     telebot.types.BotCommand("/start", "В начало"),
 ])
+
+chats = {}

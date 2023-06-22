@@ -1,10 +1,18 @@
 from django.db import models
 
+role_choices = [
+    (1, 'admin'),
+    (2, 'speaker'),
+    (3, 'user')
+]
+
 
 class Particiant(models.Model):
-    telegram_id = models.IntegerField(verbose_name='Telegram id')
+    telegram_id = models.IntegerField(unique=True, verbose_name='Telegram id')
     name = models.CharField(max_length=100, verbose_name='Имя')
     email = models.CharField(max_length=100, verbose_name='email')
+    phone = models.CharField(max_length=20, verbose_name='Телефон', blank=True, default='')
+    role = models.IntegerField(verbose_name='Роль', choices=role_choices, default=3)
 
     class Meta:
         verbose_name = 'Участник'

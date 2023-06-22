@@ -1,13 +1,5 @@
-import telebot
-from environs import Env
-
+from tg_bot.bot_env import telebot, bot
 import tg_bot.bot_functions as calls
-
-
-env = Env()
-env.read_env()
-tg_bot_token = env('TG_CLIENTS_TOKEN')
-bot = telebot.TeleBot(tg_bot_token)
 
 
 calls_map = {

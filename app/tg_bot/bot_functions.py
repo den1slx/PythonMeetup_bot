@@ -1,11 +1,10 @@
 from datetime import date
 from textwrap import dedent
 
-from tg_bot.models import Event, Lecture
+from tg_bot.models import Event, Lecture, Particiant
 from tg_bot.bot_env import telebot, bot, chats
-from tg_bot.bot_markups import speaker_menu_markup, user_menu_markup, registrate_markup, accept_markup, remove_markup,\
-    admin_menu_markup
-from tg_bot.models import Particiant
+from tg_bot.bot_markups import speaker_menu_markup, user_menu_markup, registrate_markup, accept_markup, remove_markup, \
+    admin_menu_markup, event_menu_markup
 
 
 def is_registered_user(chat_id):
@@ -123,34 +122,66 @@ def question_sent(message):
     bot.reply_to(message, f'Ваш вопрос отправлен:\n {message.text}')
 
 
-def start_bot(message: telebot.types.Message):
-    user_id = message.from_user.id
+def get_menu_markup(user_id):
     if is_registered_user(user_id):
         if is_speaker(user_id):
-            bot.send_message(
-                message.chat.id,
-                f'Здравствуйте, {message.from_user.username}',
-                reply_markup=speaker_menu_markup)
+            reply_markup = speaker_menu_markup
         elif is_admin(user_id):
-            bot.send_message(
-                message.chat.id,
-                f'Здравствуйте, {message.from_user.username}',
-                reply_markup=admin_menu_markup)
+            reply_markup = admin_menu_markup
         else:
-            bot.send_message(
-                message.chat.id,
-                f'Здравствуйте, {message.from_user.username}',
-                reply_markup=user_menu_markup
-            )
+            reply_markup = user_menu_markup
     else:
+        reply_markup = registrate_markup
+    return reply_markup
+
+
+def start_bot(message: telebot.types.Message):
+    user_id = message.from_user.id
+    reply_markup = get_menu_markup(user_id)
+    if not is_registered_user(user_id):
         chats[message.chat.id] = {
             'fullname': None,
             'mail': None,
             'id': None,
             'phonenumber': None,
         }
-        bot.send_message(
-            message.chat.id,
-            f'Здравствуйте, {message.from_user.username}',
-            reply_markup=registrate_markup
-        )
+        username = message.from_user.username
+    else:
+        username = Particiant.objects.get(telegram_id=user_id).name
+    bot.send_message(
+        message.chat.id,
+        f'Здравствуйте, {username}',
+        reply_markup=reply_markup
+
+    )
+
+
+    # if is_registered_user(user_id):
+    #     if is_speaker(user_id):
+    #         bot.send_message(
+    #             message.chat.id,
+    #             f'Здравствуйте, {message.from_user.username}',
+    #             reply_markup=speaker_menu_markup)
+    #     elif is_admin(user_id):
+    #         bot.send_message(
+    #             message.chat.id,
+    #             f'Здравствуйте, {message.from_user.username}',
+    #             reply_markup=admin_menu_markup)
+    #     else:
+    #         bot.send_message(
+    #             message.chat.id,
+    #             f'Здравствуйте, {message.from_user.username}',
+    #             reply_markup=user_menu_markup
+    #         )
+    # else:
+    #     chats[message.chat.id] = {
+    #         'fullname': None,
+    #         'mail': None,
+    #         'id': None,
+    #         'phonenumber': None,
+    #     }
+    #     bot.send_message(
+    #         message.chat.id,
+    #         f'Здравствуйте, {message.from_user.username}',
+    #         reply_markup=registrate_markup
+    #     )

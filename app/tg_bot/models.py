@@ -24,7 +24,7 @@ class Event(models.Model):
         verbose_name_plural = 'Митапы'
 
     def __str__(self):
-        return f'Митап {self.start} - {self.end}'
+        return f'Митап {self.date}'
 
 
 class Lecture(models.Model):

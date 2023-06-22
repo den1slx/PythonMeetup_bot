@@ -46,7 +46,7 @@ class Event(models.Model):
 
 class Lecture(models.Model):
     event = models.ForeignKey(Event, on_delete=models.DO_NOTHING, verbose_name='Митап')
-    speaker = models.ForeignKey(Particiant, on_delete=models.DO_NOTHING, verbose_name='Доклатчик')
+    speaker = models.ForeignKey(Particiant, on_delete=models.DO_NOTHING, verbose_name='Докладчик')
     title = models.CharField(max_length=300, verbose_name='Тема доклада')
     start = models.TimeField(verbose_name='Время начала доклада')
     end = models.TimeField(verbose_name='Время окончания доклада')

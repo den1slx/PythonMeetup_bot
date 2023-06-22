@@ -3,7 +3,8 @@ from textwrap import dedent
 
 from tg_bot.models import Event, Lecture
 from tg_bot.bot_env import telebot, bot, chats
-from tg_bot.bot_markups import speaker_menu_markup, user_menu_markup, registrate_markup, accept_markup, remove_markup
+from tg_bot.bot_markups import speaker_menu_markup, user_menu_markup, registrate_markup, accept_markup, remove_markup, \
+    event_menu_markup
 
 
 def is_registered_user(chat_id):
@@ -89,6 +90,19 @@ def registrate_user(message: telebot.types.Message, step=0):
             )
             return
         return
+
+
+def event_start(message):
+    msg = bot.send_message(message.chat.id, 'Мероприятие 20.06 началось', reply_markup=event_menu_markup)
+
+
+def ask_question(message):
+    msg = bot.send_message(message.chat.id, 'Введите свой вопрос докладчику')
+    bot.register_next_step_handler(msg, question_sent)
+
+
+def question_sent(message):
+    bot.reply_to(message, f'Ваш вопрос отправлен:\n {message.text}')
 
 
 def start_bot(message: telebot.types.Message):

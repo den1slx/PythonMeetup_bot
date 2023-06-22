@@ -1,3 +1,7 @@
+from datetime import date
+from textwrap import dedent
+
+from tg_bot.models import Event, Lecture
 from tg_bot.bot_env import telebot, bot
 from tg_bot.bot_markups import speaker_menu_markup, user_menu_markup, registrate_markup, accept_markup, remove_markup
 
@@ -20,7 +24,22 @@ def get_info(message: telebot.types.Message):
 
 def get_schedule(message: telebot.types.Message):
     # TODO get schedule from db
-    bot.send_message(message.chat.id, f'Расписание выступлений')
+    current_date = date.today()
+    event = Event.objects.filter(date__gte=current_date).first()
+    if event is None:
+        message_text = 'Митап пока на стадии подготовки. Позже оправим вам дополнительную информацию.'
+    else:
+        start_text = f'''
+                <b>Расписание митапа {event.date}</b> 
+                ({event.start.strftime('%H:%M')}-{event.end.strftime('%H:%M')})
+
+                '''
+        message_text = dedent(start_text)
+        lectures = Lecture.objects.filter(event=event)
+        for lecture in lectures:
+            message_text += f"{lecture.start.strftime('%H:%M')} - {lecture.title}\n"
+    bot.edit_message_text(message_text, message.chat.id, message.id, parse_mode='HTML', reply_markup=registrate_markup)
+    # bot.send_message(message.chat.id, message_text, parse_mode='HTML', reply_markup=registrate_markup)
     return
 
 

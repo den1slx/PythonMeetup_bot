@@ -32,3 +32,5 @@ bot.set_my_description(dedent(description_text))
 chats = {}
 
 logging.basicConfig(level=logging.INFO, filename="bot_log.log", filemode="w")
+
+chats = {}

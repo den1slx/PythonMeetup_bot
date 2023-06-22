@@ -36,5 +36,5 @@ accept = types.KeyboardButton(text='Подтвердить')
 reject = types.KeyboardButton(text='Отменить')
 accept_markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 accept_markup.add(accept, reject)
-
+remove_markup = types.ReplyKeyboardRemove()
 

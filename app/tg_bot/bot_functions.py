@@ -10,6 +10,7 @@ from tg_bot.models import Event, Lecture, Particiant
 from tg_bot.bot_env import telebot, bot, chats
 from tg_bot.bot_markups import speaker_menu_markup, user_menu_markup, registrate_markup, accept_markup, remove_markup, \
     admin_menu_markup, event_menu_markup, get_donation_markup
+
 from tg_bot.models import Particiant
 
 

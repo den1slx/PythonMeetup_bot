@@ -41,6 +41,15 @@ keyboard = [
 event_menu_markup = types.InlineKeyboardMarkup(keyboard)
 
 
+keyboard = [
+    [
+        types.InlineKeyboardButton("Кнопка для рассылки", callback_data='5'),
+        types.InlineKeyboardButton("Кнопка для рассылки 2", callback_data='6'),
+    ],
+]
+admin_menu_markup = types.InlineKeyboardMarkup(keyboard)
+
+
 accept = types.KeyboardButton(text='Подтвердить')
 reject = types.KeyboardButton(text='Отменить')
 accept_markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)

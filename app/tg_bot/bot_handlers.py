@@ -7,7 +7,9 @@ calls_map = {
     '2': calls.get_info,
     '3': calls.get_schedule,
     '4': calls.change_speaker,
-    '5': calls.ask_question
+    '5': calls.ask_question,
+    '6': calls.spam_schedule_message,
+    '7': calls.spam_event_message,
 }
 
 

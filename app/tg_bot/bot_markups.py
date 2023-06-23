@@ -20,6 +20,9 @@ keyboard = [
     [
         types.InlineKeyboardButton("Расписание", callback_data='3')
     ],
+    [
+        types.InlineKeyboardButton("Задать вопрос", callback_data='5')
+    ],
 ]
 user_menu_markup = types.InlineKeyboardMarkup(keyboard)
 
@@ -43,8 +46,8 @@ event_menu_markup = types.InlineKeyboardMarkup(keyboard)
 
 keyboard = [
     [
-        types.InlineKeyboardButton("Кнопка для рассылки", callback_data='5'),
-        types.InlineKeyboardButton("Кнопка для рассылки 2", callback_data='6'),
+        types.InlineKeyboardButton("Заспамить расписание", callback_data='6'),
+        types.InlineKeyboardButton("Заспамить эвент", callback_data='7'),
     ],
 ]
 admin_menu_markup = types.InlineKeyboardMarkup(keyboard)

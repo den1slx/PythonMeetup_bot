@@ -2,6 +2,8 @@ from textwrap import dedent
 
 from environs import Env
 import telebot
+import logging
+
 
 env = Env()
 env.read_env()
@@ -23,3 +25,5 @@ description_text = '''
 bot.set_my_description(dedent(description_text))
 
 chats = {}
+
+logging.basicConfig(level=logging.INFO, filename="bot_log.log", filemode="w")

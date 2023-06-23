@@ -7,6 +7,12 @@ role_choices = [
 ]
 
 
+class ParticiantQuerySet(models.QuerySet):
+    def get_ids(self):
+        ids = [p.telegram_id for p in self.all()]
+        return ids
+
+
 class Particiant(models.Model):
     telegram_id = models.IntegerField(unique=True, verbose_name='Telegram id')
     name = models.CharField(max_length=100, verbose_name='Имя')
@@ -14,6 +20,7 @@ class Particiant(models.Model):
     phone = models.CharField(max_length=20, verbose_name='Телефон', blank=True, default='')
     role = models.IntegerField(verbose_name='Роль', choices=role_choices, default=3)
 
+    objects = ParticiantQuerySet.as_manager()
     class Meta:
         verbose_name = 'Участник'
         verbose_name_plural = 'Участники'

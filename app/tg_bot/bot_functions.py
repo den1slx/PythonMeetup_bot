@@ -1,6 +1,8 @@
 from datetime import date
 from textwrap import dedent
+from telebot.apihelper import ApiTelegramException
 
+from tg_bot.bot_env import logging
 from django.core.exceptions import ObjectDoesNotExist
 
 from tg_bot.models import Event, Lecture, Particiant
@@ -10,18 +12,19 @@ from tg_bot.bot_markups import speaker_menu_markup, user_menu_markup, registrate
 
 
 def is_registered_user(chat_id):
-    # TODO check user in db
-    return True
+    try:
+        Particiant.objects.get(telegram_id=chat_id)
+        return True
+    except Particiant.DoesNotExist:
+        return False
 
 
 def is_speaker(chat_id):
-    # TODO check user status
-    return False
+    return Particiant.objects.get(telegram_id=chat_id).role == 2
 
 
 def is_admin(chat_id):
-    # TODO check user status
-    return False
+    return Particiant.objects.get(telegram_id=chat_id).role == 1
 
 
 def get_info(message: telebot.types.Message):
@@ -29,17 +32,45 @@ def get_info(message: telebot.types.Message):
     <b>О нас</b>
     Мы решили собрать экспертов, чтобы они поделись опытом и новыми идеями. 
     Чтобы участники могли приобрести новые знакомства и пообщаться в неформальной обстановке.
-    
+
     Присоединяйтесь к нам!
     '''
     text_message = dedent(text_message)
     bot.send_message(message.chat.id, text_message, parse_mode='HTML', reply_markup=get_menu_markup(message.chat.id))
     return
 
+    # # TODO add info
+    # bot.send_message(message.chat.id, f'Информация о нас {chats}')
+    # return
 
-def save_user_in_db(tg_id, fullname, mail):
-    Particiant.objects.get_or_create(telegram_id=tg_id, name=fullname, email=mail)
+
+def save_user_in_db(tg_id, fullname, mail, phone):
+    Particiant.objects.get_or_create(telegram_id=tg_id, name=fullname, email=mail, phone=phone)
     return
+
+
+def spam_schedule_message(message: telebot.types.Message):
+    ids = Particiant.objects.get_ids()
+    for id_ in ids:
+        try:
+            msg = bot.send_message(id_, 'Расписание изменено')
+            get_schedule(msg)
+        except ApiTelegramException:
+            logging.info(f'Этот пользователь({id_}) не общался с ботом "spam_schedule_message"')
+            continue
+
+
+def spam_event_message(message):
+    ids = Particiant.objects.get_ids()
+    event_date = ''  # TODO get event date
+    event_info = ''  # TODO get event info
+    for id_ in ids:
+        try:
+            msg = bot.send_message(id_, f'Следующий эвент будет {event_date}. Посетите нас снова.')
+            bot.send_message(id_, event_info)
+        except ApiTelegramException:
+            logging.info(f'Этот пользователь({id_}) не общался с ботом "spam_event_message"')
+            continue
 
 
 def get_schedule(message: telebot.types.Message):
@@ -65,8 +96,16 @@ def get_schedule(message: telebot.types.Message):
     return
 
 
-def change_speaker():
-    # TODO change speaker status
+def change_speaker(message):
+    speaker = Particiant.objects.filter(role=2)
+    speaker_id = speaker.first().telegram_id
+    speaker.update(role=3)
+    bot.send_message(speaker_id, 'Ваше выступление завершено. Освободите сцену')
+
+    # new_speaker = ''  # TODO get next speaker
+    # new_speaker.update(role=2)
+    # new_speaker_id = new_speaker.first().telegram_id
+    # bot.send_message(new_speaker, 'Ваша очередь выступать')
     return
 
 
@@ -105,7 +144,7 @@ def registrate_user(message: telebot.types.Message, step=0):
         bot.register_next_step_handler(msg, registrate_user, 6)
     if step == 6:
         if message.text == 'Подтвердить':
-            save_user_in_db(user['id'], user['fullname'], user['mail'])
+            save_user_in_db(user['id'], user['fullname'], user['mail'], user['phonenumber'])
             msg = bot.send_message(
                 message.chat.id,
                 'Регистрация завершена. Используйте команду /start',
@@ -177,7 +216,7 @@ def start_bot(message: telebot.types.Message):
     message_text = dedent(message_text)
     bot.send_message(
         message.chat.id,
-        message_text,
+        f'Здравствуйте, {username}',
         reply_markup=reply_markup
 
     )

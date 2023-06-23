@@ -8,8 +8,11 @@ from tg_bot.bot_markups import speaker_menu_markup, user_menu_markup, registrate
 
 
 def is_registered_user(chat_id):
-    # TODO check user in db
-    return True
+    try:
+        Particiant.objects.get(telegram_id=chat_id)
+        return True
+    except Particiant.DoesNotExist:
+        return False
 
 
 def is_speaker(chat_id):
@@ -28,8 +31,8 @@ def get_info(message: telebot.types.Message):
     return
 
 
-def save_user_in_db(tg_id, fullname, mail):
-    Particiant.objects.get_or_create(telegram_id=tg_id, name=fullname, email=mail)
+def save_user_in_db(tg_id, fullname, mail, phone):
+    Particiant.objects.get_or_create(telegram_id=tg_id, name=fullname, email=mail, phone=phone)
     return
 
 
@@ -96,7 +99,7 @@ def registrate_user(message: telebot.types.Message, step=0):
         bot.register_next_step_handler(msg, registrate_user, 6)
     if step == 6:
         if message.text == 'Подтвердить':
-            save_user_in_db(user['id'], user['fullname'], user['mail'])
+            save_user_in_db(user['id'], user['fullname'], user['mail'], user['phonenumber'])
             msg = bot.send_message(
                 message.chat.id,
                 'Регистрация завершена. Используйте команду /start',

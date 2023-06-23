@@ -1,5 +1,7 @@
 from environs import Env
 import telebot
+import logging
+
 
 env = Env()
 env.read_env()
@@ -11,3 +13,5 @@ bot.set_my_commands([
 ])
 
 chats = {}
+
+logging.basicConfig(level=logging.INFO, filename="bot_log.log", filemode="w")

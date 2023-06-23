@@ -153,7 +153,7 @@ def start_bot(message: telebot.types.Message):
     message_text = f'''
         Здравствуйте, {username}
         Это чат бот Python митапа.
-        Ближайший состоится {event.date}
+        Ближайший состоится {event.date.strftime('%d.%m.%Y')}
         
         Здесь вы можете: 
         - зарегистрироваться 
@@ -167,7 +167,9 @@ def start_bot(message: telebot.types.Message):
         message.chat.id,
         message_text,
         reply_markup=reply_markup
+
     )
+
 
     # if is_registered_user(user_id):
     #     if is_speaker(user_id):

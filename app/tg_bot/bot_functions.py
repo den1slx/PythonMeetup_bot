@@ -1,10 +1,10 @@
 from datetime import date
 from textwrap import dedent
 from telebot.apihelper import ApiTelegramException
+from django.core.exceptions import ObjectDoesNotExist
+from django.utils import timezone
 
 from tg_bot.bot_env import logging
-from django.core.exceptions import ObjectDoesNotExist
-
 from tg_bot.models import Event, Lecture, Particiant
 from tg_bot.bot_env import telebot, bot, chats
 from tg_bot.bot_markups import speaker_menu_markup, user_menu_markup, registrate_markup, accept_markup, remove_markup, \
@@ -53,7 +53,7 @@ def spam_schedule_message(message: telebot.types.Message):
     ids = Particiant.objects.get_ids()
     for id_ in ids:
         try:
-            msg = bot.send_message(id_, 'Расписание изменено')
+            msg = bot.send_message(id_, 'Расписание изменено', reply_markup=remove_markup)
             get_schedule(msg)
         except ApiTelegramException:
             logging.info(f'Этот пользователь({id_}) не общался с ботом "spam_schedule_message"')
@@ -62,12 +62,14 @@ def spam_schedule_message(message: telebot.types.Message):
 
 def spam_event_message(message):
     ids = Particiant.objects.get_ids()
-    event_date = ''  # TODO get event date
-    event_info = ''  # TODO get event info
+    today = timezone.now().date()
+    event = Event.objects.filter(date__gt=today).first()
+    event_date = event.date
+    event_info = f'{event.start} - {event.end}'
     for id_ in ids:
         try:
-            msg = bot.send_message(id_, f'Следующий эвент будет {event_date}. Посетите нас снова.')
-            bot.send_message(id_, event_info)
+            msg = bot.send_message(id_, f'Следующий эвент будет {event_date}.', reply_markup=remove_markup)
+            bot.send_message(id_, f'Время проведения эвента: {event_info}. Посетите нас снова.')
         except ApiTelegramException:
             logging.info(f'Этот пользователь({id_}) не общался с ботом "spam_event_message"')
             continue

@@ -178,7 +178,14 @@ def ask_question(message):
 
 
 def question_sent(message):
-    bot.reply_to(message, f'Ваш вопрос отправлен:\n {message.text}')
+    speaker = Particiant.objects.filter(role=2).first()
+    try:
+        speaker_id = speaker.id
+        bot.reply_to(message, f'Ваш вопрос отправлен:\n {message.text}')
+        bot.send_message(speaker_id, message.text)
+    except AttributeError:
+        bot.reply_to(message, f'Ваш вопрос не отправлен:\n {message.text}')
+        logging.info('AttributeError: speaker not found')
 
 
 def get_menu_markup(user_id):

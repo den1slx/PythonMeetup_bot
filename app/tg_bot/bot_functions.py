@@ -27,6 +27,11 @@ def is_admin(chat_id):
     return Particiant.objects.get(telegram_id=chat_id).role == 1
 
 
+def add_admin(telegram_id):
+    user = Particiant.objects.filter(telegram_id=telegram_id)
+    user.update(role=1)
+
+
 def get_info(message: telebot.types.Message):
     text_message = f'''
     <b>О нас</b>
@@ -54,7 +59,8 @@ def spam_schedule_message(message: telebot.types.Message):
     for id_ in ids:
         try:
             msg = bot.send_message(id_, 'Расписание изменено', reply_markup=remove_markup)
-            get_schedule(msg)
+            text = get_schedule(msg, text_only=True)
+            bot.send_message(id_, text, reply_markup=remove_markup, parse_mode='HTML')
         except ApiTelegramException:
             logging.info(f'Этот пользователь({id_}) не общался с ботом "spam_schedule_message"')
             continue
@@ -75,7 +81,7 @@ def spam_event_message(message):
             continue
 
 
-def get_schedule(message: telebot.types.Message):
+def get_schedule(message: telebot.types.Message, text_only=False):
     # TODO get schedule from db
     current_date = date.today()
     event = Event.objects.filter(date__gte=current_date).first()
@@ -90,7 +96,13 @@ def get_schedule(message: telebot.types.Message):
         message_text = dedent(start_text)
         lectures = Lecture.objects.filter(event=event)
         for lecture in lectures:
-            message_text += f"{lecture.start.strftime('%H:%M')} - {lecture.title}\n"
+            lecture_start = lecture.start.strftime('%H:%M')
+            lecture_end = lecture.end.strftime('%H:%M')
+
+            message_text += f"{lecture_start} - {lecture_end} <b>{lecture.title}</b> " \
+                            f"(<i>{lecture.speaker.name}</i>)\n"
+    if text_only:
+        return message_text
     # bot.edit_message_text(message_text, message.chat.id, message.id, parse_mode='HTML', reply_markup=remove_markup)
     #  Убрал маркап тк расписание также используется у зарегистрированных пользователей  # TODO clean up
     bot.edit_message_text(message_text, message.chat.id, message.id, parse_mode='HTML')
@@ -226,36 +238,4 @@ def start_bot(message: telebot.types.Message):
         message.chat.id,
         f'Здравствуйте, {username}',
         reply_markup=reply_markup
-
     )
-
-
-    # if is_registered_user(user_id):
-    #     if is_speaker(user_id):
-    #         bot.send_message(
-    #             message.chat.id,
-    #             f'Здравствуйте, {message.from_user.username}',
-    #             reply_markup=speaker_menu_markup)
-    #     elif is_admin(user_id):
-    #         bot.send_message(
-    #             message.chat.id,
-    #             f'Здравствуйте, {message.from_user.username}',
-    #             reply_markup=admin_menu_markup)
-    #     else:
-    #         bot.send_message(
-    #             message.chat.id,
-    #             f'Здравствуйте, {message.from_user.username}',
-    #             reply_markup=user_menu_markup
-    #         )
-    # else:
-    #     chats[message.chat.id] = {
-    #         'fullname': None,
-    #         'mail': None,
-    #         'id': None,
-    #         'phonenumber': None,
-    #     }
-    #     bot.send_message(
-    #         message.chat.id,
-    #         f'Здравствуйте, {message.from_user.username}',
-    #         reply_markup=registrate_markup
-    #     )

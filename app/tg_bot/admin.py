@@ -1,6 +1,8 @@
+import logging
 from textwrap import dedent
 
 from django.contrib import admin
+from telebot.apihelper import ApiTelegramException
 
 from tg_bot.bot_functions import get_menu_markup
 from tg_bot.bot_env import bot
@@ -31,19 +33,25 @@ class AdminSEvent(admin.ModelAdmin):
                 Информируем вас о предстоящем Python митапе,
                 который состоится <b>{next_event.date.strftime('%d.%m.%Y')}</b>
                 
-                Приглащаем вас принять участие в качесстве гостя или докладчика
+                Приглащаем вас принять участие в качестве гостя или докладчика
                 '''
                 message_text = dedent(message_text)
-                msg = bot.send_message(user.telegram_id,
-                                       message_text,
-                                       parse_mode='HTML',
-                                       reply_markup=get_menu_markup(user.telegram_id)
-                                       )
+                try:
+                    msg = bot.send_message(user.telegram_id,
+                                           message_text,
+                                           parse_mode='HTML',
+                                           reply_markup=get_menu_markup(user.telegram_id)
+                                           )
+                except ApiTelegramException:
+                    logging.info(f'Пользователь с id={user.telegram_id} не найден')
             admins = Particiant.objects.filter(role=1)
             for admin in admins:
-                msg = bot.send_message(admin.telegram_id,
-                                       f'{admin.name}. Оповещений разослано: {users_count}'
-                                       )
+                try:
+                    msg = bot.send_message(admin.telegram_id,
+                                           f'{admin.name}. Оповещений разослано: {users_count}'
+                                           )
+                except ApiTelegramException:
+                    logging.info(f'Пользователь с id={admin.telegram_id} не найден')
 
 
 @admin.register(Lecture)

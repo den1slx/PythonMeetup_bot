@@ -59,7 +59,8 @@ def spam_schedule_message(message: telebot.types.Message):
     for id_ in ids:
         try:
             msg = bot.send_message(id_, 'Расписание изменено', reply_markup=remove_markup)
-            get_schedule(msg)
+            text = get_schedule(msg, text_only=True)
+            bot.send_message(id_, text, reply_markup=remove_markup, parse_mode='HTML')
         except ApiTelegramException:
             logging.info(f'Этот пользователь({id_}) не общался с ботом "spam_schedule_message"')
             continue
@@ -80,7 +81,7 @@ def spam_event_message(message):
             continue
 
 
-def get_schedule(message: telebot.types.Message):
+def get_schedule(message: telebot.types.Message, text_only=False):
     # TODO get schedule from db
     current_date = date.today()
     event = Event.objects.filter(date__gte=current_date).first()
@@ -100,6 +101,8 @@ def get_schedule(message: telebot.types.Message):
 
             message_text += f"{lecture_start} - {lecture_end} <b>{lecture.title}</b> " \
                             f"(<i>{lecture.speaker.name}</i>)\n"
+    if text_only:
+        return message_text
     # bot.edit_message_text(message_text, message.chat.id, message.id, parse_mode='HTML', reply_markup=remove_markup)
     #  Убрал маркап тк расписание также используется у зарегистрированных пользователей  # TODO clean up
     bot.edit_message_text(message_text, message.chat.id, message.id, parse_mode='HTML')

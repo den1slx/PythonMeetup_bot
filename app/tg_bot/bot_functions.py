@@ -164,12 +164,18 @@ def event_start(message):
 
 
 def ask_question(message):
-    msg = bot.send_message(message.chat.id, 'Введите свой вопрос докладчику')
-    bot.register_next_step_handler(msg, question_sent)
+    now = timezone.now()
+    event = Event.objects.filter(date=now.date()).first()
+    lecture = Lecture.objects.filter(event=event, start__lte=now.time(), end__gte=now.time()).first()
+    speaker = lecture.speaker
+    msg = bot.send_message(message.chat.id, f'Доклад: {lecture.title}\nДокладчик: {speaker.name}\n'
+                                            f'Введите свой вопрос докладчику')
+    bot.register_next_step_handler(msg, question_sent, speaker)
 
 
-def question_sent(message):
-    bot.reply_to(message, f'Ваш вопрос отправлен:\n {message.text}')
+def question_sent(message, speaker):
+    bot.send_message(speaker.telegram_id, f'Вопрос:\n{message.text}')
+    bot.reply_to(message, f'Ваш вопрос отправлен:\n{message.text}')
 
 
 def get_menu_markup(user_id):

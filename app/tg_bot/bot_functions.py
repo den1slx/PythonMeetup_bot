@@ -1,6 +1,8 @@
 from datetime import date
 from textwrap import dedent
 
+from django.core.exceptions import ObjectDoesNotExist
+
 from tg_bot.models import Event, Lecture, Particiant
 from tg_bot.bot_env import telebot, bot, chats
 from tg_bot.bot_markups import speaker_menu_markup, user_menu_markup, registrate_markup, accept_markup, remove_markup, \
@@ -149,7 +151,10 @@ def start_bot(message: telebot.types.Message):
         }
         username = message.from_user.username
     else:
-        username = Particiant.objects.get(telegram_id=user_id).name
+        try:
+            username = Particiant.objects.get(telegram_id=user_id).name
+        except ObjectDoesNotExist:
+            username = message.from_user.username
     message_text = f'''
         Здравствуйте, {username}
         Это чат бот Python митапа.

@@ -95,7 +95,11 @@ def get_schedule(message: telebot.types.Message):
         message_text = dedent(start_text)
         lectures = Lecture.objects.filter(event=event)
         for lecture in lectures:
-            message_text += f"{lecture.start.strftime('%H:%M')} - {lecture.title}\n"
+            lecture_start = lecture.start.strftime('%H:%M')
+            lecture_end = lecture.end.strftime('%H:%M')
+
+            message_text += f"{lecture_start} - {lecture_end} <b>{lecture.title}</b> " \
+                            f"(<i>{lecture.speaker.name}</i>)\n"
     # bot.edit_message_text(message_text, message.chat.id, message.id, parse_mode='HTML', reply_markup=remove_markup)
     #  Убрал маркап тк расписание также используется у зарегистрированных пользователей  # TODO clean up
     bot.edit_message_text(message_text, message.chat.id, message.id, parse_mode='HTML')

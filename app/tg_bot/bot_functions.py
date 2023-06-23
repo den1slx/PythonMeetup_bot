@@ -225,36 +225,4 @@ def start_bot(message: telebot.types.Message):
         message.chat.id,
         f'Здравствуйте, {username}',
         reply_markup=reply_markup
-
     )
-
-
-    # if is_registered_user(user_id):
-    #     if is_speaker(user_id):
-    #         bot.send_message(
-    #             message.chat.id,
-    #             f'Здравствуйте, {message.from_user.username}',
-    #             reply_markup=speaker_menu_markup)
-    #     elif is_admin(user_id):
-    #         bot.send_message(
-    #             message.chat.id,
-    #             f'Здравствуйте, {message.from_user.username}',
-    #             reply_markup=admin_menu_markup)
-    #     else:
-    #         bot.send_message(
-    #             message.chat.id,
-    #             f'Здравствуйте, {message.from_user.username}',
-    #             reply_markup=user_menu_markup
-    #         )
-    # else:
-    #     chats[message.chat.id] = {
-    #         'fullname': None,
-    #         'mail': None,
-    #         'id': None,
-    #         'phonenumber': None,
-    #     }
-    #     bot.send_message(
-    #         message.chat.id,
-    #         f'Здравствуйте, {message.from_user.username}',
-    #         reply_markup=registrate_markup
-    #     )

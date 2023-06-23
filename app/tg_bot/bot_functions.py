@@ -27,6 +27,11 @@ def is_admin(chat_id):
     return Particiant.objects.get(telegram_id=chat_id).role == 1
 
 
+def add_admin(telegram_id):
+    user = Particiant.objects.filter(telegram_id=telegram_id)
+    user.update(role=1)
+
+
 def get_info(message: telebot.types.Message):
     text_message = f'''
     <b>О нас</b>

@@ -25,8 +25,15 @@ def is_admin(chat_id):
 
 
 def get_info(message: telebot.types.Message):
-    # TODO add info
-    bot.send_message(message.chat.id, f'Информация о нас')
+    text_message = f'''
+    <b>О нас</b>
+    Мы решили собрать экспертов, чтобы они поделись опытом и новыми идеями. 
+    Чтобы участники могли приобрести новые знакомства и пообщаться в неформальной обстановке.
+    
+    Присоединяйтесь к нам!
+    '''
+    text_message = dedent(text_message)
+    bot.send_message(message.chat.id, text_message, parse_mode='HTML', reply_markup=get_menu_markup(message.chat.id))
     return
 
 

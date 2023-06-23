@@ -1,6 +1,8 @@
 from datetime import date
 from textwrap import dedent
+from telebot.apihelper import ApiTelegramException
 
+from tg_bot.bot_env import logging
 from tg_bot.models import Event, Lecture, Particiant
 from tg_bot.bot_env import telebot, bot, chats
 from tg_bot.bot_markups import speaker_menu_markup, user_menu_markup, registrate_markup, accept_markup, remove_markup, \
@@ -16,24 +18,46 @@ def is_registered_user(chat_id):
 
 
 def is_speaker(chat_id):
-    # TODO check user status
-    return False
+    return Particiant.objects.get(telegram_id=chat_id).role == 2
 
 
 def is_admin(chat_id):
-    # TODO check user status
-    return False
+    return Particiant.objects.get(telegram_id=chat_id).role == 1
 
 
 def get_info(message: telebot.types.Message):
     # TODO add info
-    bot.send_message(message.chat.id, f'Информация о нас')
+    bot.send_message(message.chat.id, f'Информация о нас {chats}')
     return
 
 
 def save_user_in_db(tg_id, fullname, mail, phone):
     Particiant.objects.get_or_create(telegram_id=tg_id, name=fullname, email=mail, phone=phone)
     return
+
+
+def spam_schedule_message(message: telebot.types.Message):
+    ids = Particiant.objects.get_ids()
+    for id_ in ids:
+        try:
+            msg = bot.send_message(id_, 'Расписание изменено')
+            get_schedule(msg)
+        except ApiTelegramException:
+            logging.info(f'Этот пользователь({id_}) не общался с ботом "spam_schedule_message"')
+            continue
+
+
+def spam_event_message(message):
+    ids = Particiant.objects.get_ids()
+    event_date = ''  # TODO get event date
+    event_info = ''  # TODO get event info
+    for id_ in ids:
+        try:
+            msg = bot.send_message(id_, f'Следующий эвент будет {event_date}. Посетите нас снова.')
+            bot.send_message(id_, event_info)
+        except ApiTelegramException:
+            logging.info(f'Этот пользователь({id_}) не общался с ботом "spam_event_message"')
+            continue
 
 
 def get_schedule(message: telebot.types.Message):
@@ -59,8 +83,16 @@ def get_schedule(message: telebot.types.Message):
     return
 
 
-def change_speaker():
-    # TODO change speaker status
+def change_speaker(message):
+    speaker = Particiant.objects.filter(role=2)
+    speaker_id = speaker.first().telegram_id
+    speaker.update(role=3)
+    bot.send_message(speaker_id, 'Ваше выступление завершено. Освободите сцену')
+
+    # new_speaker = ''  # TODO get next speaker
+    # new_speaker.update(role=2)
+    # new_speaker_id = new_speaker.first().telegram_id
+    # bot.send_message(new_speaker, 'Ваша очередь выступать')
     return
 
 

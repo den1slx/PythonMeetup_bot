@@ -138,6 +138,8 @@ def get_menu_markup(user_id):
 def start_bot(message: telebot.types.Message):
     user_id = message.from_user.id
     reply_markup = get_menu_markup(user_id)
+    current_date = date.today()
+    event = Event.objects.filter(date__gte=current_date).first()
     if not is_registered_user(user_id):
         chats[message.chat.id] = {
             'fullname': None,
@@ -148,13 +150,24 @@ def start_bot(message: telebot.types.Message):
         username = message.from_user.username
     else:
         username = Particiant.objects.get(telegram_id=user_id).name
+    message_text = f'''
+        Здравствуйте, {username}
+        Это чат бот Python митапа.
+        Ближайший состоится {event.date}
+        
+        Здесь вы можете: 
+        - зарегистрироваться 
+        - узнать расписание митапа
+        - задать вопросы докладчикам во время выступлений
+        - оперативно получить информацию об изменениях
+        - быть в курсе о следующих мероприятиях 
+        '''
+    message_text = dedent(message_text)
     bot.send_message(
         message.chat.id,
-        f'Здравствуйте, {username}',
+        message_text,
         reply_markup=reply_markup
-
     )
-
 
     # if is_registered_user(user_id):
     #     if is_speaker(user_id):

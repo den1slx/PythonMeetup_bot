@@ -1,10 +1,9 @@
 from datetime import date
 from textwrap import dedent
 from telebot.apihelper import ApiTelegramException
-
-from tg_bot.bot_env import logging
 from django.core.exceptions import ObjectDoesNotExist
 
+from tg_bot.bot_env import logging
 from tg_bot.models import Event, Lecture, Particiant
 from tg_bot.bot_env import telebot, bot, chats
 from tg_bot.bot_markups import speaker_menu_markup, user_menu_markup, registrate_markup, accept_markup, remove_markup, \

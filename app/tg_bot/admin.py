@@ -18,6 +18,8 @@ class AdminParticiant(admin.ModelAdmin):
 @admin.register(Event)
 class AdminSEvent(admin.ModelAdmin):
     list_display = ('date',)
+    ordering = ('date',)
+    readonly_fields = ('active_or_next_lecture',)
 
     actions = ['send_all_users_notification']
 

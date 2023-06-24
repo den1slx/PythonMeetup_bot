@@ -41,7 +41,7 @@ def runSchedulers():
 
     while True:
         schedule.run_pending()
-        sleep(1)
+        sleep(30)
 
 
 def run_bot():

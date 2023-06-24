@@ -100,8 +100,11 @@ def get_schedule(message: telebot.types.Message, text_only=False):
                 speaker_text = ' <b>Вы докладчик</b>'
             else:
                 speaker_text = ''
-
-            message_text += f"{lecture_start} - {lecture_end} <b>{lecture.title}</b> " \
+            if lecture == event.active_or_next_lecture:
+                active_lesson = '🔊'
+            else:
+                active_lesson = ''
+            message_text += f"{active_lesson}{lecture_start} - {lecture_end} <b>{lecture.title}</b> " \
                             f"(<i>{lecture.speaker.name}</i>){speaker_text}\n"
     if text_only:
         return message_text
@@ -121,12 +124,13 @@ def change_speaker(message):
     now = timezone.now().time()
     today = timezone.now().date()
     event = Event.objects.filter(date=today).order_by('date').first()
-    next_speaker = Lecture.objects.filter(event=event, end__gt=now).order_by('start').first()
-    if not next_speaker:
-        # TODO spam event end
+    next_lecture = Lecture.objects.filter(event=event, end__gt=now).order_by('start').first()
+    if not next_lecture or next_lecture == event.active_or_next_lecture:
+        event.active_or_next_lecture = None
         return
-    next_speaker_id = next_speaker.speaker.telegram_id
-    while timezone.now().time() < next_speaker.start:   # TODO add normal time skip. need better variant
+    event.active_or_next_lecture = next_lecture
+    next_speaker_id = next_lecture.speaker.telegram_id
+    while timezone.now().time() < next_lecture.start:  # TODO add normal time skip. need better variant
         pass
 
     Particiant.objects.filter(telegram_id=next_speaker_id).update(role=2)
@@ -190,7 +194,10 @@ def event_start_notification():
         event_date = event.date.strftime('%d.%m.%Y')
         event_start = event.start.strftime('%H:%M')
         if event.date == current_date and event_start == now:
-            first_speaker_id = Lecture.objects.filter(event=event).order_by('start').first().speaker.telegram_id
+            first_lecture = Lecture.objects.filter(event=event).order_by('start').first()
+            first_speaker_id = first_lecture.speaker.telegram_id
+            event.active_or_next_lecture = first_lecture
+            event.save()
             Particiant.objects.filter(telegram_id=first_speaker_id).update(role=2)
             for user in Particiant.objects.all():
                 message_text = f'''
@@ -200,7 +207,8 @@ def event_start_notification():
                 '''
                 message_text = dedent(message_text)
                 try:
-                    msg = bot.send_message(user.telegram_id, message_text, reply_markup=get_menu_markup(user.telegram_id))
+                    msg = bot.send_message(user.telegram_id, message_text,
+                                           reply_markup=get_menu_markup(user.telegram_id))
                 except ApiTelegramException:
                     logging.info('AttributeError: chat not found')
 

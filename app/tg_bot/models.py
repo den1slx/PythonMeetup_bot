@@ -33,6 +33,8 @@ class Event(models.Model):
     date = models.DateField(verbose_name='Дата проведения митапа')
     start = models.TimeField(verbose_name='Начало митапа')
     end = models.TimeField(verbose_name='Окончание митапа')
+    active_or_next_lecture = models.ForeignKey('Lecture', on_delete=models.DO_NOTHING, verbose_name='Лекция сейчас',
+                                       related_name='events', blank=True, null=True, default=None)
 
     class Meta:
         verbose_name = 'Митап'

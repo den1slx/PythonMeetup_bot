@@ -33,16 +33,18 @@ def add_admin(telegram_id):
 
 
 def get_info(message: telebot.types.Message):
-    text_message = f'''
+    message_text = f'''
     <b>О нас</b>
     Мы решили собрать экспертов, чтобы они поделись опытом и новыми идеями. 
     Чтобы участники могли приобрести новые знакомства и пообщаться в неформальной обстановке.
 
     Присоединяйтесь к нам!
     '''
-    text_message = dedent(text_message)
-    bot.send_message(message.chat.id, text_message, parse_mode='HTML', reply_markup=get_menu_markup(message.chat.id))
-    return
+    message_text = dedent(message_text)
+    bot.edit_message_text(message_text, message.chat.id, message.id,
+                          reply_markup=get_menu_markup(message.chat.id), parse_mode='HTML')
+    # bot.send_message(message.chat.id, text_message, parse_mode='HTML', reply_markup=get_menu_markup(message.chat.id))
+    # return
 
 
 def save_user_in_db(tg_id, fullname, mail, phone):
@@ -94,14 +96,19 @@ def get_schedule(message: telebot.types.Message, text_only=False):
         for lecture in lectures:
             lecture_start = lecture.start.strftime('%H:%M')
             lecture_end = lecture.end.strftime('%H:%M')
+            if message.chat.id == lecture.speaker.telegram_id:
+                speaker_text = ' <b>Вы докладчик</b>'
+            else:
+                speaker_text = ''
 
             message_text += f"{lecture_start} - {lecture_end} <b>{lecture.title}</b> " \
-                            f"(<i>{lecture.speaker.name}</i>)\n"
+                            f"(<i>{lecture.speaker.name}</i>){speaker_text}\n"
     if text_only:
         return message_text
     # bot.edit_message_text(message_text, message.chat.id, message.id, parse_mode='HTML', reply_markup=remove_markup)
     #  Убрал маркап тк расписание также используется у зарегистрированных пользователей  # TODO clean up
-    bot.edit_message_text(message_text, message.chat.id, message.id, parse_mode='HTML')
+    bot.edit_message_text(message_text, message.chat.id, message.id,
+                          reply_markup=get_menu_markup(message.chat.id), parse_mode='HTML')
     # bot.send_message(message.chat.id, message_text, parse_mode='HTML', reply_markup=registrate_markup)
     return
 

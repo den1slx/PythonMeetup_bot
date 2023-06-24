@@ -183,7 +183,8 @@ def event_start_notification():
         event_date = event.date.strftime('%d.%m.%Y')
         event_start = event.start.strftime('%H:%M')
         if event.date == current_date and event_start == now:
-            set_first_speaker(event)
+            first_speaker_id = Lecture.objects.filter(event=event).order_by('start').first().speaker.telegram_id
+            Particiant.objects.filter(telegram_id=first_speaker_id).update(role=2)
             for user in Particiant.objects.all():
                 message_text = f'''
                 Уважаемый {user.name}!

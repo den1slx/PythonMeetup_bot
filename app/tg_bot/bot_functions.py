@@ -44,10 +44,6 @@ def get_info(message: telebot.types.Message):
     bot.send_message(message.chat.id, text_message, parse_mode='HTML', reply_markup=get_menu_markup(message.chat.id))
     return
 
-    # # TODO add info
-    # bot.send_message(message.chat.id, f'Информация о нас {chats}')
-    # return
-
 
 def save_user_in_db(tg_id, fullname, mail, phone):
     Particiant.objects.get_or_create(telegram_id=tg_id, name=fullname, email=mail, phone=phone)
@@ -115,12 +111,20 @@ def change_speaker(message):
     speaker_id = speaker.first().telegram_id
     speaker.update(role=3)
     bot.send_message(speaker_id, 'Ваше выступление завершено. Освободите сцену')
+    now = timezone.now().time()
+    today = timezone.now().date()
+    event = Event.objects.filter(date=today).first()
+    next_speaker = Lecture.objects.filter(event=event, end__gt=now).order_by('start').first()
+    if not next_speaker:
+        # TODO spam event end
+        return
+    next_speaker_id = next_speaker.speaker.telegram_id
+    while timezone.now().time() < next_speaker.start:   # TODO add normal time skip. need better variant
+        pass
 
-    # new_speaker = ''  # TODO get next speaker
-    # new_speaker.update(role=2)
-    # new_speaker_id = new_speaker.first().telegram_id
-    # bot.send_message(new_speaker, 'Ваша очередь выступать')
-    return
+    Particiant.objects.filter(telegram_id=next_speaker_id).update(role=2)
+    bot.send_message(speaker_id, 'Ваше выступление началось. Выходите на сцену')
+    # TODO add spam for all users
 
 
 def registrate_user(message: telebot.types.Message, step=0):
@@ -172,7 +176,17 @@ def registrate_user(message: telebot.types.Message, step=0):
 
 
 def event_start(message):
-    msg = bot.send_message(message.chat.id, 'Мероприятие 20.06 началось', reply_markup=event_menu_markup)
+    today = timezone.now().date()
+    msg = bot.send_message(
+        message.chat.id,
+        f'Мероприятие {today} началось',
+        reply_markup=event_menu_markup
+    )
+    event = Event.objects.filter(date=today).first()
+    first_speaker_id = Lecture.objects.filter(event=event).order_by('start').first().speaker.telegram_id
+    Particiant.objects.filter(telegram_id=first_speaker_id).update(role=2)
+
+
 
 
 def ask_question(message):
@@ -187,13 +201,16 @@ def ask_question(message):
 
 def question_sent(message):
     speaker = Particiant.objects.filter(role=2).first()
-    try:
-        speaker_id = speaker.id
-        bot.reply_to(message, f'Ваш вопрос отправлен:\n {message.text}')
-        bot.send_message(speaker_id, message.text)
-    except AttributeError:
-        bot.reply_to(message, f'Ваш вопрос не отправлен:\n {message.text}')
-        logging.info('AttributeError: speaker not found')
+    if speaker:
+        try:
+            speaker_id = speaker.id
+            bot.reply_to(message, f'Ваш вопрос отправлен:\n {message.text}')
+            bot.send_message(speaker_id, message.text)
+        except AttributeError:
+            bot.reply_to(message, f'Ваш вопрос не отправлен:\n {message.text}')
+            logging.info('AttributeError: speaker not found')
+    else:
+        bot.reply_to(message, f'Ваш вопрос не отправлен. Нет активного спикера')
 
 
 def get_menu_markup(user_id):

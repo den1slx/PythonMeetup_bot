@@ -65,7 +65,7 @@ def spam_schedule_message(message: telebot.types.Message):
 def spam_event_message(message):
     ids = Particiant.objects.get_ids()
     today = timezone.now().date()
-    event = Event.objects.filter(date__gt=today).first()
+    event = Event.objects.filter(date__gt=today).order_by('date').first()
     event_date = event.date
     event_info = f'{event.start} - {event.end}'
     for id_ in ids:
@@ -80,7 +80,7 @@ def spam_event_message(message):
 def get_schedule(message: telebot.types.Message, text_only=False):
     # TODO get schedule from db
     current_date = date.today()
-    event = Event.objects.filter(date__gte=current_date).first()
+    event = Event.objects.filter(date__gte=current_date).order_by('date').first()
     if event is None:
         message_text = 'Митап пока на стадии подготовки. Позже оправим вам дополнительную информацию.'
     else:
@@ -113,7 +113,7 @@ def change_speaker(message):
     bot.send_message(speaker_id, 'Ваше выступление завершено. Освободите сцену')
     now = timezone.now().time()
     today = timezone.now().date()
-    event = Event.objects.filter(date=today).first()
+    event = Event.objects.filter(date=today).order_by('date').first()
     next_speaker = Lecture.objects.filter(event=event, end__gt=now).order_by('start').first()
     if not next_speaker:
         # TODO spam event end
@@ -200,7 +200,7 @@ def event_start_notification():
 
 def ask_question(message):
     now = timezone.now()
-    event = Event.objects.filter(date=now.date()).first()
+    event = Event.objects.filter(date=now.date()).order_by('date').first()
     lecture = Lecture.objects.filter(event=event, start__lte=now.time(), end__gte=now.time()).first()
     speaker = lecture.speaker
     msg = bot.send_message(message.chat.id, f'Доклад: {lecture.title}\nДокладчик: {speaker.name}\n'
@@ -239,7 +239,7 @@ def start_bot(message: telebot.types.Message):
     user_id = message.from_user.id
     reply_markup = get_menu_markup(user_id)
     current_date = date.today()
-    event = Event.objects.filter(date__gte=current_date).first()
+    event = Event.objects.filter(date__gte=current_date).order_by('date').first()
     if not is_registered_user(user_id):
         chats[message.chat.id] = {
             'fullname': None,

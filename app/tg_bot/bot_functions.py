@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from textwrap import dedent
 from telebot.apihelper import ApiTelegramException
 from django.core.exceptions import ObjectDoesNotExist
@@ -167,9 +167,26 @@ def registrate_user(message: telebot.types.Message, step=0):
         return
 
 
-def event_start(message):
-    msg = bot.send_message(message.chat.id, 'Мероприятие 20.06 началось', reply_markup=event_menu_markup)
-
+def event_start_notification():
+    current_date = date.today()
+    event = Event.objects.filter(date__gte=current_date).first()
+    if event:
+        now = datetime.now().strftime("%H:%M")
+        event_date = event.date.strftime('%d.%m.%Y')
+        event_start = event.start.strftime('%H:%M')
+        print(now)
+        if event.date == current_date and event_start == now:
+            for user in Particiant.objects.all():
+                message_text = f'''
+                Уважаемый {user.name}!
+                Митап {event_date} начался в {event_start}.
+                Ознакомтесь с расписанием.
+                '''
+                message_text = dedent(message_text)
+                try:
+                    msg = bot.send_message(user.telegram_id, message_text, reply_markup=get_menu_markup(user.telegram_id))
+                except ApiTelegramException:
+                    logging.info('AttributeError: chat not found')
 
 def ask_question(message):
     now = timezone.now()

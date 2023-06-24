@@ -1,4 +1,4 @@
-import datetime
+from time import sleep
 
 from tg_bot.bot_env import telebot, bot
 import tg_bot.bot_functions as calls
@@ -36,16 +36,19 @@ def runBot():
 
 
 def runSchedulers():
-    # schedule.every(1).day.at("12:00").do(calls.send_notification)  # - запуск каждый день в определенное время
-    # schedule.every(10).seconds.do(calls.send_notification)  # - запуск каждые 10 секунд
+    # schedule.every(1).day.at("12:00").do(calls.send_start_notification)  # - запуск каждый день в определенное время
+    schedule.every(1).minutes.at(":01").do(calls.event_start_notification)  # - запуск каждую минуту
+
     while True:
         schedule.run_pending()
-        datetime.time.sleep(1)
+        sleep(1)
 
 
 def run_bot():
     t1 = threading.Thread(target=runBot, daemon=True)
+    t2 = threading.Thread(target=runSchedulers, daemon=True)
     t1.start()
+    t2.start()
 
     while 1:
         pass

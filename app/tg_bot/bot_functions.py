@@ -111,12 +111,20 @@ def change_speaker(message):
     speaker_id = speaker.first().telegram_id
     speaker.update(role=3)
     bot.send_message(speaker_id, 'Ваше выступление завершено. Освободите сцену')
+    now = timezone.now().time()
+    today = timezone.now().date()
+    event = Event.objects.filter(date=today).first()
+    next_speaker = Lecture.objects.filter(event=event, end__gt=now).order_by('start').first()
+    if not next_speaker:
+        # TODO spam event end
+        return
+    next_speaker_id = next_speaker.speaker.telegram_id
+    while timezone.now().time() < next_speaker.start:   # TODO add normal time skip. need better variant
+        pass
 
-    # new_speaker = ''  # TODO get next speaker
-    # new_speaker.update(role=2)
-    # new_speaker_id = new_speaker.first().telegram_id
-    # bot.send_message(new_speaker, 'Ваша очередь выступать')
-    return
+    Particiant.objects.filter(telegram_id=next_speaker_id).update(role=2)
+    bot.send_message(speaker_id, 'Ваше выступление началось. Выходите на сцену')
+    # TODO add spam for all users
 
 
 def registrate_user(message: telebot.types.Message, step=0):
@@ -174,8 +182,8 @@ def event_start_notification():
         now = datetime.now().strftime("%H:%M")
         event_date = event.date.strftime('%d.%m.%Y')
         event_start = event.start.strftime('%H:%M')
-        print(now)
         if event.date == current_date and event_start == now:
+            set_first_speaker(event)
             for user in Particiant.objects.all():
                 message_text = f'''
                 Уважаемый {user.name}!
@@ -187,6 +195,13 @@ def event_start_notification():
                     msg = bot.send_message(user.telegram_id, message_text, reply_markup=get_menu_markup(user.telegram_id))
                 except ApiTelegramException:
                     logging.info('AttributeError: chat not found')
+
+
+def set_first_speaker(event):
+    first_speaker_id = Lecture.objects.filter(event=event).order_by('start').first().speaker.telegram_id
+    Particiant.objects.filter(telegram_id=first_speaker_id).update(role=2)
+
+
 
 def ask_question(message):
     now = timezone.now()
@@ -200,13 +215,16 @@ def ask_question(message):
 
 def question_sent(message):
     speaker = Particiant.objects.filter(role=2).first()
-    try:
-        speaker_id = speaker.id
-        bot.reply_to(message, f'Ваш вопрос отправлен:\n {message.text}')
-        bot.send_message(speaker_id, message.text)
-    except AttributeError:
-        bot.reply_to(message, f'Ваш вопрос не отправлен:\n {message.text}')
-        logging.info('AttributeError: speaker not found')
+    if speaker:
+        try:
+            speaker_id = speaker.id
+            bot.reply_to(message, f'Ваш вопрос отправлен:\n {message.text}')
+            bot.send_message(speaker_id, message.text)
+        except AttributeError:
+            bot.reply_to(message, f'Ваш вопрос не отправлен:\n {message.text}')
+            logging.info('AttributeError: speaker not found')
+    else:
+        bot.reply_to(message, f'Ваш вопрос не отправлен. Нет активного спикера')
 
 
 def get_menu_markup(user_id):

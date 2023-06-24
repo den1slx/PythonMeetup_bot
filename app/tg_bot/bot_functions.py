@@ -197,12 +197,6 @@ def event_start_notification():
                     logging.info('AttributeError: chat not found')
 
 
-def set_first_speaker(event):
-    first_speaker_id = Lecture.objects.filter(event=event).order_by('start').first().speaker.telegram_id
-    Particiant.objects.filter(telegram_id=first_speaker_id).update(role=2)
-
-
-
 def ask_question(message):
     now = timezone.now()
     event = Event.objects.filter(date=now.date()).first()

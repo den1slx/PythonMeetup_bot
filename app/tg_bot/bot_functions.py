@@ -44,10 +44,6 @@ def get_info(message: telebot.types.Message):
     bot.send_message(message.chat.id, text_message, parse_mode='HTML', reply_markup=get_menu_markup(message.chat.id))
     return
 
-    # # TODO add info
-    # bot.send_message(message.chat.id, f'Информация о нас {chats}')
-    # return
-
 
 def save_user_in_db(tg_id, fullname, mail, phone):
     Particiant.objects.get_or_create(telegram_id=tg_id, name=fullname, email=mail, phone=phone)

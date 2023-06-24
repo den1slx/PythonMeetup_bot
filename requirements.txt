@@ -2,3 +2,4 @@ environs==9.5.0
 pyTelegramBotAPI==4.12.*
 python-dotenv==1.0.0
 Django==3.2.19
+schedule==1.2.0

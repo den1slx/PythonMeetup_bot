@@ -177,7 +177,7 @@ def registrate_user(message: telebot.types.Message, step=0):
 
 def event_start_notification():
     current_date = date.today()
-    event = Event.objects.filter(date__gte=current_date).first()
+    event = Event.objects.filter(date__gte=current_date).order_by('date').first()
     if event:
         now = datetime.now().strftime("%H:%M")
         event_date = event.date.strftime('%d.%m.%Y')

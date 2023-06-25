@@ -135,7 +135,20 @@ def change_speaker(message):
 
     Particiant.objects.filter(telegram_id=next_speaker_id).update(role=2)
     bot.send_message(speaker_id, 'Ваше выступление началось. Выходите на сцену')
-    # TODO add spam for all users
+    # Рассылка:
+    ids = Particiant.objects.get_ids()
+    name = next_lecture.speaker.name
+    theme = next_lecture.title
+    for id_ in ids:
+        try:
+            bot.send_message(
+                id_,
+                f'Выступление по теме "{theme}" началось. Выступает {name}.',
+                reply_markup=remove_markup
+            )
+        except ApiTelegramException:
+            logging.info(f'ApiTelegramException in change_speaker')
+            continue
 
 
 def registrate_user(message: telebot.types.Message, step=0):
@@ -150,7 +163,6 @@ def registrate_user(message: telebot.types.Message, step=0):
         bot.register_next_step_handler(msg, registrate_user, 2)
     if step == 2:
         if message.text == 'Подтвердить':
-            # TODO save user fullname for next steps
             msg = bot.send_message(message.chat.id, f'Введите вашу почту', reply_markup=remove_markup)
             bot.register_next_step_handler(msg, registrate_user, 3)
         else:
@@ -199,6 +211,7 @@ def event_start_notification():
             event.active_or_next_lecture = first_lecture
             event.save()
             Particiant.objects.filter(telegram_id=first_speaker_id).update(role=2)
+            bot.send_message(first_speaker_id, 'Ваше выступление началось. Выходите на сцену')
             for user in Particiant.objects.all():
                 message_text = f'''
                 Уважаемый {user.name}!

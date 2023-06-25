@@ -134,7 +134,7 @@ def change_speaker(message):
         pass
 
     Particiant.objects.filter(telegram_id=next_speaker_id).update(role=2)
-    bot.send_message(speaker_id, 'Ваше выступление началось. Выходите на сцену')
+    bot.send_message(next_speaker_id, 'Ваше выступление началось. Выходите на сцену')
     # Рассылка:
     ids = Particiant.objects.get_ids()
     name = next_lecture.speaker.name
@@ -236,7 +236,7 @@ def ask_question(message):
     bot.register_next_step_handler(msg, question_sent, speaker)
 
 
-def question_sent(message):
+def question_sent(message, question):
     speaker = Particiant.objects.filter(role=2).first()
     if speaker:
         try:

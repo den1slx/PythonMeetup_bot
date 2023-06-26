@@ -50,6 +50,7 @@ class Lecture(models.Model):
     title = models.CharField(max_length=300, verbose_name='Тема доклада')
     start = models.TimeField(verbose_name='Время начала доклада')
     end = models.TimeField(verbose_name='Время окончания доклада')
+    status = models.BooleanField(default=False, verbose_name='Доклад окончен')
 
     class Meta:
         verbose_name = 'Доклад'

@@ -119,12 +119,12 @@ def get_schedule(message: telebot.types.Message, text_only=False):
 def change_speaker(message):
     speaker = Particiant.objects.filter(role=2)
     speaker_id = speaker.first().telegram_id
-    speaker.update(role=3)
+    speaker.update(role=3, status=True)
     bot.send_message(speaker_id, 'Ваше выступление завершено. Освободите сцену')
     now = timezone.localtime().now().time()
     today = timezone.localtime().now().date()
     event = Event.objects.filter(date=today).order_by('date').first()
-    next_lecture = Lecture.objects.filter(event=event, end__gt=now).order_by('start').first()
+    next_lecture = Lecture.objects.filter(event=event, end__gt=now, status=False).order_by('start').first()
     if not next_lecture or next_lecture == event.active_or_next_lecture:
         event.active_or_next_lecture = None
         return

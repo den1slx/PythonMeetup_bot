@@ -7,7 +7,12 @@ import logging
 
 env = Env()
 env.read_env()
+
+account_id = env('ACCOUNT_ID')
+secret_key = env('SECRET_KEY')
+return_url = env('RETURN_URL', default='https://www.example.com/return_url')
 tg_bot_token = env('TG_CLIENTS_TOKEN')
+allowed_hosts = env.list("ALLOWED_HOSTS", [])
 bot = telebot.TeleBot(tg_bot_token)
 
 bot.set_my_commands([

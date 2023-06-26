@@ -124,7 +124,7 @@ def change_speaker(message):
     now = timezone.localtime().now().time()
     today = timezone.localtime().now().date()
     event = Event.objects.filter(date=today).order_by('date').first()
-    next_lecture = Lecture.objects.filter(event=event, end__gt=now).order_by('start').first()
+    next_lecture = Lecture.objects.filter(event=event, end__gt=now, status=False).order_by('start').first()
     if not next_lecture or next_lecture == event.active_or_next_lecture:
         event.active_or_next_lecture = None
         return

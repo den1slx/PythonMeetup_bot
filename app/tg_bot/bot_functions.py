@@ -11,24 +11,6 @@ from tg_bot.bot_markups import speaker_menu_markup, user_menu_markup, registrate
     admin_menu_markup, event_menu_markup, get_donation_markup
 
 
-from tg_bot.models import Particiant
-
-
-from tg_bot.models import Particiant
-
-
-from tg_bot.models import Particiant
-
-
-from tg_bot.models import Particiant
-
-
-from tg_bot.models import Particiant
-
-
-from tg_bot.models import Particiant
-
-
 def is_registered_user(chat_id):
     try:
         Particiant.objects.get(telegram_id=chat_id)

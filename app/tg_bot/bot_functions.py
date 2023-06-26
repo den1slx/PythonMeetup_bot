@@ -3,9 +3,8 @@ from textwrap import dedent
 from telebot.apihelper import ApiTelegramException
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
-from environs import Env
 
-from tg_bot.bot_env import logging
+from tg_bot.bot_env import logging, account_id, secret_key, return_url
 from tg_bot.models import Event, Lecture, Particiant
 from tg_bot.bot_env import telebot, bot, chats
 from tg_bot.bot_markups import speaker_menu_markup, user_menu_markup, registrate_markup, accept_markup, remove_markup, \
@@ -252,11 +251,7 @@ def question_sent(message, question):
 
 
 def donate(message):
-    env = Env()
-    env.read_env()
-    account_id = env('ACCOUNT_ID')
-    secret_key = env('SECRET_KEY')
-    return_url = env('RETURN_URL', default='https://www.example.com/return_url')
+
     donate_markup = get_donation_markup(account_id, secret_key, return_url)
     bot.reply_to(message, 'Ваша поддержка поможет исправить баги в этом чат-боте!\n'
                           'Пример тестовой карты с сайта ЮМани: 5555555555554477', reply_markup=donate_markup)

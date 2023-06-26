@@ -9,12 +9,9 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-from environs import Env
-
-env = Env()
-env.read_env()
-
 from pathlib import Path
+
+from tg_bot.bot_env import allowed_hosts
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,7 +26,7 @@ SECRET_KEY = 'django-insecure-1xz5cxxezxjd26ru@y2l(bd)-2y2gn^*(3z9lclob+t4+kdm5q
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", [])
+ALLOWED_HOSTS = allowed_hosts
 
 
 # Application definition

@@ -66,7 +66,7 @@ def spam_schedule_message(message: telebot.types.Message):
 
 def spam_event_message(message):
     ids = Particiant.objects.get_ids()
-    today = timezone.now().date()
+    today = timezone.localtime().now().date()
     event = Event.objects.filter(date__gt=today).order_by('date').first()
     event_date = event.date
     event_info = f'{event.start} - {event.end}'
@@ -121,8 +121,8 @@ def change_speaker(message):
     speaker_id = speaker.first().telegram_id
     speaker.update(role=3)
     bot.send_message(speaker_id, 'Ваше выступление завершено. Освободите сцену')
-    now = timezone.now().time()
-    today = timezone.now().date()
+    now = timezone.localtime().now().time()
+    today = timezone.localtime().now().date()
     event = Event.objects.filter(date=today).order_by('date').first()
     next_lecture = Lecture.objects.filter(event=event, end__gt=now).order_by('start').first()
     if not next_lecture or next_lecture == event.active_or_next_lecture:
@@ -130,7 +130,7 @@ def change_speaker(message):
         return
     event.active_or_next_lecture = next_lecture
     next_speaker_id = next_lecture.speaker.telegram_id
-    while timezone.now().time() < next_lecture.start:  # TODO add normal time skip. need better variant
+    while timezone.localtime().now().time() < next_lecture.start:  # TODO add normal time skip. need better variant
         pass
 
     Particiant.objects.filter(telegram_id=next_speaker_id).update(role=2)
@@ -227,7 +227,7 @@ def event_start_notification(message=None):
 
 
 def ask_question(message):
-    now = timezone.now()
+    now = timezone.localtime().now()
     event = Event.objects.filter(date=now.date()).order_by('date').first()
     lecture = Lecture.objects.filter(event=event, start__lte=now.time(), end__gte=now.time()).first()
     if lecture:
@@ -243,7 +243,7 @@ def question_sent(message, question):
     speaker = Particiant.objects.filter(role=2).first()
     if speaker:
         try:
-            speaker_id = speaker.id
+            speaker_id = speaker.telegram_id
             bot.reply_to(message, f'Ваш вопрос отправлен:\n {message.text}')
             bot.send_message(speaker_id, message.text)
         except AttributeError:
@@ -275,6 +275,7 @@ def get_menu_markup(user_id):
 
 def start_bot(message: telebot.types.Message):
     now = datetime.now().strftime('%H:%M')
+    timezone_now = timezone.localtime().now().strftime('%H:%M')
     user_id = message.from_user.id
     reply_markup = get_menu_markup(user_id)
     current_date = date.today()
@@ -307,6 +308,7 @@ def start_bot(message: telebot.types.Message):
     message_text = dedent(message_text)
     bot.send_message(
         message.chat.id,
-        f'Здравствуйте, {username}. Сейчас {now}',
+        f'Здравствуйте, {username}. Сейчас {now}'
+        f'и {timezone_now}',
         reply_markup=reply_markup
     )

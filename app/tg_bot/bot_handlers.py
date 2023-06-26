@@ -24,7 +24,7 @@ def command_menu(message: telebot.types.Message):
 
 @bot.message_handler(commands=['event'])
 def command_menu(message: telebot.types.Message):
-    calls.event_start(message)
+    calls.event_start_notification(message)
 
 
 @bot.callback_query_handler(func=lambda call: call.data)
@@ -42,7 +42,7 @@ def runSchedulers():
 
     while True:
         schedule.run_pending()
-        sleep(30)
+        sleep(1)
 
 
 def run_bot():

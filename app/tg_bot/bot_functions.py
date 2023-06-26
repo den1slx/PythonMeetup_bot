@@ -199,7 +199,7 @@ def registrate_user(message: telebot.types.Message, step=0):
         return
 
 
-def event_start_notification():
+def event_start_notification(message=None):
     current_date = date.today()
     event = Event.objects.filter(date__gte=current_date).order_by('date').first()
     if event:
@@ -276,6 +276,7 @@ def get_menu_markup(user_id):
 
 
 def start_bot(message: telebot.types.Message):
+    now = datetime.now().strftime('%H:%M')
     user_id = message.from_user.id
     reply_markup = get_menu_markup(user_id)
     current_date = date.today()
@@ -308,6 +309,6 @@ def start_bot(message: telebot.types.Message):
     message_text = dedent(message_text)
     bot.send_message(
         message.chat.id,
-        f'Здравствуйте, {username}',
+        f'Здравствуйте, {username}. Сейчас {now}',
         reply_markup=reply_markup
     )

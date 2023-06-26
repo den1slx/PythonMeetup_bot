@@ -1,4 +1,6 @@
 from telebot import types
+from yookassa import Configuration, Payment
+import uuid
 
 
 keyboard = [
@@ -22,6 +24,9 @@ keyboard = [
     ],
     [
         types.InlineKeyboardButton("Задать вопрос", callback_data='5')
+    ],
+    [
+        types.InlineKeyboardButton("Задонатить", callback_data='8')
     ],
 ]
 user_menu_markup = types.InlineKeyboardMarkup(keyboard)
@@ -51,6 +56,35 @@ keyboard = [
     ],
 ]
 admin_menu_markup = types.InlineKeyboardMarkup(keyboard)
+
+
+def get_donation_markup(account_id, secret_key, return_url):
+    Configuration.configure(account_id, secret_key)
+
+    idempotence_key = str(uuid.uuid4())
+    payment = Payment.create({
+        "amount": {
+            "value": "100.00",
+            "currency": "RUB"
+        },
+        "payment_method_data": {
+            "type": "bank_card"
+        },
+        "confirmation": {
+            "type": "redirect",
+            "return_url": return_url
+        },
+        "description": "Донат на митапе"
+    }, idempotence_key)
+
+    confirmation_url = payment.confirmation.confirmation_url
+
+    keyboard = [
+        [
+            types.InlineKeyboardButton("Отправить 100 руб.", url=confirmation_url),
+        ],
+    ]
+    return types.InlineKeyboardMarkup(keyboard)
 
 
 accept = types.KeyboardButton(text='Подтвердить')

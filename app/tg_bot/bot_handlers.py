@@ -13,6 +13,7 @@ calls_map = {
     '5': calls.ask_question,
     '6': calls.spam_schedule_message,
     '7': calls.spam_event_message,
+    '8': calls.donate,
 }
 
 

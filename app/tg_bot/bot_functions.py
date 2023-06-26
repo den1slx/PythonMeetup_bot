@@ -308,7 +308,6 @@ def start_bot(message: telebot.types.Message):
     message_text = dedent(message_text)
     bot.send_message(
         message.chat.id,
-        f'Здравствуйте, {username}. Сейчас {now}'
-        f'и {timezone_now}',
+        f'Здравствуйте, {username}. Сейчас {now}',
         reply_markup=reply_markup
     )

@@ -230,10 +230,13 @@ def ask_question(message):
     now = timezone.now()
     event = Event.objects.filter(date=now.date()).order_by('date').first()
     lecture = Lecture.objects.filter(event=event, start__lte=now.time(), end__gte=now.time()).first()
-    speaker = lecture.speaker
-    msg = bot.send_message(message.chat.id, f'Доклад: {lecture.title}\nДокладчик: {speaker.name}\n'
-                                            f'Введите свой вопрос докладчику')
-    bot.register_next_step_handler(msg, question_sent, speaker)
+    if lecture:
+        speaker = lecture.speaker
+        msg = bot.send_message(message.chat.id, f'Доклад: {lecture.title}\nДокладчик: {speaker.name}\n'
+                                                f'Введите свой вопрос докладчику')
+        bot.register_next_step_handler(msg, question_sent, speaker)
+    else:
+        bot.send_message(message.chat.id, 'Задавайте вопросы во время ивента')
 
 
 def question_sent(message, question):

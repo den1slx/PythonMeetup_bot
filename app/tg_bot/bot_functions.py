@@ -66,7 +66,7 @@ def spam_schedule_message(message: telebot.types.Message):
 
 def spam_event_message(message):
     ids = Particiant.objects.get_ids()
-    today = timezone.now().date()
+    today = timezone.localtime().date()
     event = Event.objects.filter(date__gt=today).order_by('date').first()
     event_date = event.date
     event_info = f'{event.start} - {event.end}'
@@ -121,8 +121,12 @@ def change_speaker(message):
     speaker_id = speaker.first().telegram_id
     speaker.update(role=3)
     bot.send_message(speaker_id, 'Ваше выступление завершено. Освободите сцену')
-    now = timezone.now().time()
-    today = timezone.now().date()
+
+    localtime = timezone.localtime()
+    now = localtime.time()
+    today = localtime.date()
+    # now = timezone.now().time()
+    # today = timezone.now().date()
     event = Event.objects.filter(date=today).order_by('date').first()
     next_lecture = Lecture.objects.filter(event=event, end__gt=now).order_by('start').first()
     if not next_lecture or next_lecture == event.active_or_next_lecture:
@@ -130,7 +134,7 @@ def change_speaker(message):
         return
     event.active_or_next_lecture = next_lecture
     next_speaker_id = next_lecture.speaker.telegram_id
-    while timezone.now().time() < next_lecture.start:  # TODO add normal time skip. need better variant
+    while timezone.localtime().time() < next_lecture.start:  # TODO add normal time skip. need better variant
         pass
 
     Particiant.objects.filter(telegram_id=next_speaker_id).update(role=2)
@@ -227,7 +231,7 @@ def event_start_notification(message=None):
 
 
 def ask_question(message):
-    now = timezone.now()
+    now = timezone.localtime()
     event = Event.objects.filter(date=now.date()).order_by('date').first()
     lecture = Lecture.objects.filter(event=event, start__lte=now.time(), end__gte=now.time()).first()
     if lecture:
